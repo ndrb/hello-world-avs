@@ -81,10 +81,10 @@ const registerOperator = async () => {
 };
 
 const monitorNewTasks = async () => {
-    await contract.createNewTask("EigenWorld");
+    await contract.createNewTask("EigenWorld DUDE");
 
     contract.on("NewTaskCreated", async (taskIndex: number, task: any) => {
-        console.log(`New task detected: Hello, ${task.name}`);
+        console.log(`New task detected: Hello Hello Hello, ${task.name}`);
         await signAndRespondToTask(taskIndex, task.taskCreatedBlock, task.name);
     });
 

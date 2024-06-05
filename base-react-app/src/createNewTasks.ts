@@ -43,7 +43,7 @@ async function createNewTask(taskName: string) {
 }
 
 // Function to create a new task with a random name every 15 seconds
-function startCreatingTasks() {
+export function startCreatingTasks() {
   // setInterval(() => {
     const randomName = generateRandomName();
     console.log(`Creating new task with name: ${randomName}`);
