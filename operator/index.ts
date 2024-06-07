@@ -4,7 +4,9 @@ import { delegationABI } from "./abis/delegationABI";
 import { contractABI } from './abis/contractABI';
 import { registryABI } from './abis/registryABI';
 import { avsDirectoryABI } from './abis/avsDirectoryABI';
+
 dotenv.config();
+
 
 const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
@@ -18,6 +20,10 @@ const delegationManager = new ethers.Contract(delegationManagerAddress, delegati
 const contract = new ethers.Contract(contractAddress, contractABI, wallet);
 const registryContract = new ethers.Contract(stakeRegistryAddress, registryABI, wallet);
 const avsDirectory = new ethers.Contract(avsDirectoryAddress, avsDirectoryABI, wallet);
+var objDb: any = {
+    registeredEL: false,
+    table: []
+ };
 
 const signAndRespondToTask = async (taskIndex: number, taskCreatedBlock: number, taskName: string) => {
     const message = `Hello, ${taskName}`;
@@ -46,6 +52,35 @@ const registerOperator = async () => {
     }, "");
     await tx1.wait();
     console.log("Operator registered on EL successfully");
+    let data: String[] = [];
+    // Configure lowdb to write data to JSON file
+
+
+    // db.json file path
+     //objDb.table.push({id: 1, square:2});
+     objDb.registeredEL = true;
+     var json = JSON.stringify(objDb);
+     var fs = require('fs');
+    //  fs.writeFile('../myjsonfile.json', json);
+    fs.appendFile(process.env.FILE_PATH, json, function (err: any) {
+        if (err) throw err;
+        console.log('Saved!');
+    });
+    //  fs.readFile('myjsonfile.json', 'utf8', function readFileCallback(err, data){
+    //     if (err){
+    //         console.log(err);
+    //     } else {
+    //     obj = JSON.parse(data); //now it an object
+    //     obj.table.push({id: 2, square:3}); //add some data
+    //     json = JSON.stringify(obj); //convert it back to json
+    //     fs.writeFile('myjsonfile.json', json, 'utf8', callback); // write it back 
+    // }});
+
+
+
+
+
+
 
     const salt = ethers.utils.hexlify(ethers.utils.randomBytes(32));
     const expiry = Math.floor(Date.now() / 1000) + 3600; // Example expiry, 1 hour from now
@@ -92,6 +127,18 @@ const monitorNewTasks = async () => {
 };
 
 const main = async () => {
+    var fs = require('fs');
+    fs.exists(process.env.FILE_PATH, function (exists: boolean) {
+        if(exists)
+        {
+        }else
+        {
+            fs.writeFile(process.env.FILE_PATH, "", { flag: 'wx' }, function (err: any) {
+                if (err) throw err;
+                console.log("It's created!");
+            });
+        }
+    });
     await registerOperator();
     monitorNewTasks().catch((error) => {
         console.error("Error monitoring tasks:", error);

@@ -6,20 +6,10 @@
     "start": "react-scripts start"
   },
   "dependencies": {
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
     "@types/node": "^20.12.12",
     "bls-signatures": "^2.0.3",
-    "bootstrap": "^5.3.3",
-    "create-react-app": "^5.0.1",
     "dotenv": "^16.4.5",
     "ethers": "^5.7.2",
-    "react": "^18.3.1",
-    "react-bootstrap": "^2.10.2",
-    "react-dom": "^18.3.1",
-    "react-scripts": "5.0.1",
-    "sqlite": "^5.1.1",
     "web-vitals": "^2.1.4",
     "web3": "^4.9.0"
   },

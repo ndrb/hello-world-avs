@@ -51,5 +51,13 @@ export function startCreatingTasks() {
   // }, 15000);
 }
 
+export function createATask() {
+  // setInterval(() => {
+    const randomName = generateRandomName();
+    console.log(`Creating new task with name: ${randomName}`);
+    createNewTask(randomName);
+  // }, 15000);
+}
+
 // Start the process
 startCreatingTasks();
