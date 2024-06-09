@@ -6,13 +6,13 @@ dist/
 
 # Ignore environment-specific files
 .env
+.env.local
 
 # Ignore editor-specific files
 .vscode/
 .idea/
 
 # Ignore TypeScript build artifacts
-*.js
 *.js.map
 *.d.ts
 

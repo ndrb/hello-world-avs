@@ -35,6 +35,8 @@ contract HelloWorldServiceManager is
     // mapping of task indices to hash of abi.encode(taskResponse, taskResponseMetadata)
     mapping(address => mapping(uint32 => bytes)) public allTaskResponses;
 
+    mapping(uint32 => string) public allTaskDetails;
+
     /* MODIFIERS */
     modifier onlyOperator() {
         require(
@@ -72,6 +74,7 @@ contract HelloWorldServiceManager is
 
         // store hash of task onchain, emit event, and increase taskNum
         allTaskHashes[latestTaskNum] = keccak256(abi.encode(newTask));
+        allTaskDetails[latestTaskNum] = name;
         emit NewTaskCreated(latestTaskNum, newTask);
         latestTaskNum = latestTaskNum + 1;
     }
