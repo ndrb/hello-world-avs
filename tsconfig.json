@@ -4,10 +4,12 @@
     "module": "commonjs",
     "outDir": "./dist",
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "composite": true,
   },
   "exclude": [
     "node_modules",
     "contracts"
-  ]
+  ],
+  "extends": "./tsconfig.paths.json",
 }
