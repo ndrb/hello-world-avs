@@ -6,6 +6,16 @@ import { delegationABI } from "./abis/delegationABI.ts";
 import { contractABI } from './abis/contractABI.ts';
 import { registryABI } from './abis/registryABI.ts';
 import { avsDirectoryABI } from './abis/avsDirectoryABI.ts';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import { styled } from '@mui/material/styles';
+
+
 
 
 const provider = new ethers.providers.JsonRpcProvider(process.env.REACT_APP_RPC_URL);
@@ -22,7 +32,27 @@ const contract = new ethers.Contract(contractAddress, contractABI, wallet);
 const registryContract = new ethers.Contract(stakeRegistryAddress, registryABI, wallet);
 const avsDirectory = new ethers.Contract(avsDirectoryAddress, avsDirectoryABI, wallet);
 
-const sessionStorageBaseName = "HELLO_WORLD_AVS_LOCAL_"
+const sessionStorageBaseName = "HELLO_WORLD_AVS_LOCAL_";
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: theme.palette.common.black,
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0,
+  },
+}));
+
 
 class App extends Component {
 
@@ -99,9 +129,10 @@ class App extends Component {
   
   async monitorNewTasks(){  
     contract.on("NewTaskCreated", async (taskIndex, task) => {
-        console.log(`New task detected: Hello Hello Hello, ${task.name}`);
+        console.log(`New task detected: ${task.name}`);
         var tasksMap = this.state.tasksMap;
         var taskNameValue = tasksMap.get(task.name);
+        console.log("PEEP:",taskNameValue);
         tasksMap.set(task.name, {taskCreatedBlock: task.taskCreatedBlock, taskIndex: taskIndex, signed: false, receipt: taskNameValue['receipt']});
         this.setState({ tasksMap: tasksMap});  
         var mapToArr = Array.from(tasksMap.entries());
@@ -234,8 +265,6 @@ class App extends Component {
 
   render() {
     return (
-
-
       <div className="container">
         <h1>Hello, World!</h1>
         <p>Your account: {this.state.account}</p>
@@ -258,7 +287,7 @@ class App extends Component {
           <button onClick={()=>this.mainFunction()}>Register Operator</button>
           </div>
         )}
-        <ul>
+        {/* <ul>
           {this.state.tasksArray.map((task, index) => (
             <li key={index}>
               {task}
@@ -271,7 +300,33 @@ class App extends Component {
               {task} and {values.receipt} and {values.taskCreatedBlock} and {values.taskIndex} and {values.signed+""}
             </li>
           ))}
-        </ul>
+        </ul> */}
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 700 }} aria-label="customized table">
+            <TableHead>
+              <TableRow>
+                <StyledTableCell>Task Name</StyledTableCell>
+                <StyledTableCell align="right">Tx Receipt</StyledTableCell>
+                <StyledTableCell align="right">Task Created Block&nbsp;</StyledTableCell>
+                <StyledTableCell align="right">Task Index&nbsp;</StyledTableCell>
+                <StyledTableCell align="right">Is Signed&nbsp;</StyledTableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {Array.from(this.state.tasksMap).map(([task, values], index) => (
+                <StyledTableRow key={index}>
+                  <StyledTableCell component="th" scope="row">
+                  {task}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">{values.receipt} </StyledTableCell>
+                  <StyledTableCell align="right">{values.taskCreatedBlock}</StyledTableCell>
+                  <StyledTableCell align="right">{values.taskIndex} </StyledTableCell>
+                  <StyledTableCell align="right">{values.signed!==undefined && values.signed+""}</StyledTableCell>
+                </StyledTableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </div>  
     );
   }
