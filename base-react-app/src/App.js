@@ -35,7 +35,6 @@ const registryContract = new ethers.Contract(stakeRegistryAddress, registryABI, 
 const avsDirectory = new ethers.Contract(avsDirectoryAddress, avsDirectoryABI, wallet);
 
 
-const sessionStorageBaseName = "HELLO_WORLD_AVS_LOCAL_";
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: "#353494",
