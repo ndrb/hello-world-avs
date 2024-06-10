@@ -34,6 +34,7 @@ const contract = new ethers.Contract(contractAddress, contractABI, wallet);
 const registryContract = new ethers.Contract(stakeRegistryAddress, registryABI, wallet);
 const avsDirectory = new ethers.Contract(avsDirectoryAddress, avsDirectoryABI, wallet);
 
+
 const sessionStorageBaseName = "HELLO_WORLD_AVS_LOCAL_";
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -113,6 +114,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
+const sessionStorageBaseName = "HELLO_WORLD_AVS_LOCAL_"
 
 class App extends Component {
 

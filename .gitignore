@@ -4,7 +4,7 @@ node_modules/
 # Ignore built output
 dist/
 
-# Ignore environment-specific files - We will upload the env var to the base repo to show what is needed
+# Ignore environment-specific files - We will upload the env var to the base react app repo to show how to name the variable
 #.env
 
 # Ignore editor-specific files
