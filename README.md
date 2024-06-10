@@ -42,10 +42,21 @@ Following NodeJS packages:
 2. Run `yarn install`
 3. Run `make start-chain-with-contracts-deployed`
     * This will build the contracts, start an Anvil chain, deploy the contracts to it, and leaves the chain running in the current terminal
-4. Open new terminal tab and run `make start-operator`
-    * This will compile the AVS software and start monitoring new tasks
-5. Open new terminal tab and run `make spam-tasks` (Optional)
-    * This will spam the AVS with random names every 15 seconds
+4. Run `cd base-react-app` followed by `npm run start`
+    * Instead of running the stand-alone operator software as in the original repo, we just run the React server (AVS code was moved into React)
+5. Use the buttons to control the AVS  software
+    * Start by Registering the oeprator `Register Operator`; followed by `Monitor Tasks`; then enter any task name and click on `Create Task`
+
+### React Code (Addon to the original repo)
+- We moved the ABI code inside the /src folder because React cannot read files and folders outisde its /src directory
+- For simplicity we moved the AVS code into App.js, and removed the type definitions 
+- We added an env var into the base-react-app folder and copied over the env var values from .env.anvil, in React all env var names need to be preceded by: `REACT_APP_` so we rename the variables
+- We move our const declarations outside our main class along with some custom styling definitions,
+the custom styles have their colors taken from the EigenLayer website color scheme
+- We have one main App class that contains the AVS code in separate functions
+- The data that can be retreived on chain will be fetched using ethers JS and the HelloWorld smart contract address
+- The data that is not saved on-chain such as the task name is saved in app state, which is stored in session storage everytime it is udpated
+in order to survive a page refresh or re-navigation. Session storage is deleted when the server is shut down
 
 ## Extensions
 

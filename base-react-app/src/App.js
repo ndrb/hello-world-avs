@@ -364,7 +364,7 @@ class App extends Component {
                   variant="contained" 
                   onClick={()=>this.createNewTask()}
                   disabled={(!this.state.monitoringTasks) || (this.state.textInput === "")}
-                  >Click Task</ELButton>
+                  >Create Task</ELButton>
                 </Box>
               </ELHeighAdjustedPaper>
             </Grid>
