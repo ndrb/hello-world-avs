@@ -19,6 +19,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 
+
 const provider = new ethers.providers.JsonRpcProvider(process.env.REACT_APP_RPC_URL);
 const wallet = new ethers.Wallet(process.env.REACT_APP_PRIVATE_KEY, provider);
 const signingKey = new ethers.utils.SigningKey(process.env.REACT_APP_PRIVATE_KEY);
@@ -36,7 +37,7 @@ const avsDirectory = new ethers.Contract(avsDirectoryAddress, avsDirectoryABI, w
 const sessionStorageBaseName = "HELLO_WORLD_AVS_LOCAL_";
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.common.black,
+    backgroundColor: "#353494",
     color: theme.palette.common.white,
   },
   [`&.${tableCellClasses.body}`]: {
@@ -79,6 +80,7 @@ const ELButton = styled(Button)(({ theme }) => ({
 const Item = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
   padding: theme.spacing(1),
+  fontSize:"16px",
   textAlign: 'center',
   alignContent: 'center',
   backgroundColor: '#CADFFF',
@@ -87,7 +89,7 @@ const Item = styled(Paper)(({ theme }) => ({
   margin: '.75em',
 }));
 const StaticItem = styled(Paper)(({ theme }) => ({
-  backgroundColor: '#271C7C',
+  backgroundColor: '#353494',
   elevation: 24,
   padding: theme.spacing(1),
   textAlign: 'center',
@@ -98,11 +100,12 @@ const StaticItem = styled(Paper)(({ theme }) => ({
   color: '#ffffff',
 }));
 const PaddedPaper = styled(Paper)(({ theme }) => ({
-  marginTop: '50em',
+  marginTop: '2em',
+  marginBottom: '2em',
 }));
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:nth-of-type(odd)': {
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: '#CADFFF',
   },
   // hide last border
   '&:last-child td, &:last-child th': {
@@ -185,6 +188,8 @@ class App extends Component {
   }
   
   async monitorNewTasks(){  
+    this.setState({ monitoringTasks: true});
+    window.sessionStorage.setItem(sessionStorageBaseName+"monitoringTasks", true);
     contract.on("NewTaskCreated", async (taskIndex, task) => {
         console.log(`New task detected: ${task.name}`);
         var tasksMap = this.state.tasksMap;
@@ -200,15 +205,7 @@ class App extends Component {
         this.setState({ latestBlockTask: task.taskCreatedBlock});  
         window.sessionStorage.setItem(sessionStorageBaseName+"latestBlockTask", task.taskCreatedBlock);
     });
-  
     console.log("Monitoring for new tasks...");
-  }
-  
-  async mainFunction() {
-    await this.registerOperator();
-    this.monitorNewTasks().catch((error) => {
-        console.error("Error monitoring tasks:", error);
-    });
   }
   
   async createNewTask() {
@@ -234,9 +231,8 @@ class App extends Component {
     }
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.loadBlockchainData();
-    this.monitorNewTasks();
   }
 
   async loadBlockchainData() {
@@ -259,17 +255,12 @@ class App extends Component {
         allTaskHashes = error.toString() + "ERROR";
     }
 
-    var operatorRegisteredOnELSaved = window.sessionStorage.getItem(sessionStorageBaseName+"operatorRegisteredOnEL");
-    if ( operatorRegisteredOnELSaved == null ) 
-    {
-      operatorRegisteredOnELSaved = false;
-    }
+    //To convert string value to boolean
+    var operatorRegisteredOnELSaved = window.sessionStorage.getItem(sessionStorageBaseName+"operatorRegisteredOnEL") === "true";
 
-    var operatorRegisteredOnAVSSaved = window.sessionStorage.getItem(sessionStorageBaseName+"operatorRegisteredOnAVS");
-    if ( operatorRegisteredOnAVSSaved == null ) 
-    {
-      operatorRegisteredOnAVSSaved = false;
-    }
+    var operatorRegisteredOnAVSSaved = window.sessionStorage.getItem(sessionStorageBaseName+"operatorRegisteredOnAVS") === "true";
+
+    var monitoringTasks = false;
 
     var tasksMap = JSON.parse(window.sessionStorage.getItem(sessionStorageBaseName+"tasksMap"));
     if (tasksMap == null)
@@ -280,12 +271,12 @@ class App extends Component {
     {
       tasksMap = new Map((tasksMap));
     }
+
     var latestBlockTaskSaved = window.sessionStorage.getItem(sessionStorageBaseName+"latestBlockTask");
     if(latestBlockTaskSaved == null)
     {
       latestBlockTaskSaved = 0;
     }
-
 
     this.setState({ 
       account: accounts[0], 
@@ -295,6 +286,7 @@ class App extends Component {
       allTaskResponses: allTaskResponses,
       operatorRegisteredOnEL: operatorRegisteredOnELSaved,
       operatorRegisteredOnAVS: operatorRegisteredOnAVSSaved,
+      monitoringTasks: monitoringTasks,
       latestBlockTask: latestBlockTaskSaved,
     })
   }
@@ -307,26 +299,26 @@ class App extends Component {
     super(props)
     this.createNewTask = this.createNewTask.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.mainFunction = this.mainFunction.bind(this);
     this.registerOperator = this.registerOperator.bind(this);
     var tasksMap = new Map();
     this.state = { 
       account: '', 
       tasksMap: tasksMap,
-      textInput: "", 
+      textInput: '', 
       operatorRegisteredOnEL: false,
       operatorRegisteredOnAVS: false,
+      monitoringTasks: false,
       latestBlockTask: 0,
      }
   }
 
   render() {
     return (
-      <div id="backdrop" sx={{ marginBottom: '5em'  }} >
+      <div id="backdrop" >
         <div className="container">
           <Grid container spacing={2}>
           <Grid item xs={12} md={12}>
-              <StaticItem><h3>Hello World AVS <b id="gradientColor">with React Frontend</b> </h3></StaticItem>
+              <StaticItem><h3>Hello World AVS <b id="gradientColor">with React Frontend</b></h3></StaticItem>
             </Grid>
             <Grid item xs={6} md={8}>
               <Item>Latest Task Hash: {this.state.allTaskHashes}</Item>
@@ -349,7 +341,7 @@ class App extends Component {
           <Grid item xs={12} md={12}>
               <StaticItem><h5>Task Creation</h5></StaticItem>
             </Grid>
-            <Grid item xs={6} md={6}>
+            <Grid item xs={4} md={4}>
               <ELHeighAdjustedPaper>
                 <Box>
                   <TextField
@@ -364,23 +356,38 @@ class App extends Component {
                 </Box>
               </ELHeighAdjustedPaper>
             </Grid>
-            <Grid item xs={6} md={6}>
+            <Grid item xs={4} md={4}>
               <ELHeighAdjustedPaper>
                 <Box>
-                  <ELButton variant="contained" onClick={()=>this.createNewTask()}>Click Task</ELButton>
+                  <ELButton 
+                  variant="contained" 
+                  onClick={()=>this.createNewTask()}
+                  disabled={(!this.state.monitoringTasks) || (this.state.textInput === "")}
+                  >Click Task</ELButton>
+                </Box>
+              </ELHeighAdjustedPaper>
+            </Grid>
+            <Grid item xs={4} md={4}>
+            <ELHeighAdjustedPaper>
+                <Box>
+                  <ELButton 
+                  variant="contained" 
+                  onClick={()=>this.monitorNewTasks()} 
+                  disabled={(!this.state.operatorRegisteredOnEL && !this.state.operatorRegisteredOnAVS) || (this.state.monitoringTasks)}
+                  >Monitor Tasks</ELButton>
                 </Box>
               </ELHeighAdjustedPaper>
             </Grid>
           </Grid>
-          <TableContainer sx={{ marginTop: '2em' }} component={PaddedPaper}>
-            <Table sx={{ minWidth: 1000 }} aria-label="customized table">
+          <TableContainer component={PaddedPaper}>
+            <Table aria-label="customized table">
               <TableHead>
                 <TableRow>
                   <StyledTableCell>Task Name</StyledTableCell>
-                  <StyledTableCell align="right">Tx Receipt</StyledTableCell>
                   <StyledTableCell align="right">Task Created Block&nbsp;</StyledTableCell>
                   <StyledTableCell align="right">Task Index&nbsp;</StyledTableCell>
                   <StyledTableCell align="right">Is Signed&nbsp;</StyledTableCell>
+                  <StyledTableCell align="right">Tx Receipt</StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -389,10 +396,10 @@ class App extends Component {
                     <StyledTableCell component="th" scope="row">
                     {task}
                     </StyledTableCell>
-                    <StyledTableCell align="right">{values.receipt} </StyledTableCell>
                     <StyledTableCell align="right">{values.taskCreatedBlock}</StyledTableCell>
                     <StyledTableCell align="right">{values.taskIndex} </StyledTableCell>
                     <StyledTableCell align="right">{values.signed!==undefined && values.signed+""}</StyledTableCell>
+                    <StyledTableCell align="right">{values.receipt} </StyledTableCell>
                   </StyledTableRow>
                 ))}
               </TableBody>
@@ -413,7 +420,7 @@ class App extends Component {
               <ELPaper>            
                 <ELButton 
                   disabled={this.state.operatorRegisteredOnEL && this.state.operatorRegisteredOnAVS} 
-                  onClick={()=>this.mainFunction()} variant="contained">Register Operator
+                  onClick={()=>this.registerOperator()} variant="contained">Register Operator
                 </ELButton>
               </ELPaper>
             </Grid>

@@ -1,16 +1,8 @@
-.container{
-    width:100%;
-    height: 100%;
-    color: #1a0c6d;
-}
-
-body{
-    margin: '5em',
+html{
+    background-color: #1a0c6d;
 }
 
 #backdrop{
-    width:100%;
-    height: 100%;
     background-color: #1a0c6d;
 }
 
@@ -19,7 +11,7 @@ body{
 }
 
 #gradientColor {
-    background: -webkit-linear-gradient(#61DBFB, #1B0D6D);
+    background: -webkit-linear-gradient(#feb801, #61DBFB);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
