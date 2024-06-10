@@ -1,0 +1,19 @@
+html{
+    background-color: #1a0c6d;
+}
+
+#backdrop{
+    background-color: #1a0c6d;
+}
+
+* {
+    color: #ffffff
+}
+
+#gradientColor {
+    background: -webkit-linear-gradient(#feb801, #61DBFB);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    .nobr { white-space: nowrap }
+}

@@ -6,6 +6,18 @@ import { delegationABI } from "./abis/delegationABI.ts";
 import { contractABI } from './abis/contractABI.ts';
 import { registryABI } from './abis/registryABI.ts';
 import { avsDirectoryABI } from './abis/avsDirectoryABI.ts';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import { styled } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
 
 
 const provider = new ethers.providers.JsonRpcProvider(process.env.REACT_APP_RPC_URL);
@@ -21,6 +33,86 @@ const delegationManager = new ethers.Contract(delegationManagerAddress, delegati
 const contract = new ethers.Contract(contractAddress, contractABI, wallet);
 const registryContract = new ethers.Contract(stakeRegistryAddress, registryABI, wallet);
 const avsDirectory = new ethers.Contract(avsDirectoryAddress, avsDirectoryABI, wallet);
+
+
+const sessionStorageBaseName = "HELLO_WORLD_AVS_LOCAL_";
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: "#353494",
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+const ELPaper = styled(Paper)(({ theme }) => ({
+  width: '28em',
+  height: '6em',
+  padding: theme.spacing(1),
+  ...theme.typography.body2,
+  textAlign: 'center',
+  alignContent: 'center',
+  backgroundColor: '#CADFFF',
+  paddingTop: '.75rem',
+  paddingBottom: '.75rem',
+  margin: '.75em',
+}));
+const ELHeighAdjustedPaper= styled(Paper)(({ theme }) => ({
+  height: '8em',
+  padding: theme.spacing(1),
+  ...theme.typography.body2,
+  textAlign: 'center',
+  alignContent: 'center',
+  backgroundColor: '#CADFFF',
+  paddingTop: '.75rem',
+  paddingBottom: '.75rem',
+  margin: '.75em',
+}));
+const ELButton = styled(Button)(({ theme }) => ({
+  padding: theme.spacing(1),
+  ...theme.typography.body2,
+  textAlign: 'center',
+  alignContent: 'center',
+  backgroundColor: '#271C7C',
+  paddingTop: '.75rem',
+  paddingBottom: '.75rem',
+  margin: '.75em',
+}));
+const Item = styled(Paper)(({ theme }) => ({
+  ...theme.typography.body2,
+  padding: theme.spacing(1),
+  fontSize:"16px",
+  textAlign: 'center',
+  alignContent: 'center',
+  backgroundColor: '#CADFFF',
+  paddingTop: '.75rem',
+  paddingBottom: '.75rem',
+  margin: '.75em',
+}));
+const StaticItem = styled(Paper)(({ theme }) => ({
+  backgroundColor: '#353494',
+  elevation: 24,
+  padding: theme.spacing(1),
+  textAlign: 'center',
+  alignContent: 'center',
+  paddingTop: '.75rem',
+  paddingBottom: '.75rem',
+  margin: '.75em',
+  color: '#ffffff',
+}));
+const PaddedPaper = styled(Paper)(({ theme }) => ({
+  marginTop: '2em',
+  marginBottom: '2em',
+}));
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: '#CADFFF',
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0,
+  },
+}));
 
 const sessionStorageBaseName = "HELLO_WORLD_AVS_LOCAL_"
 
@@ -98,25 +190,24 @@ class App extends Component {
   }
   
   async monitorNewTasks(){  
+    this.setState({ monitoringTasks: true});
+    window.sessionStorage.setItem(sessionStorageBaseName+"monitoringTasks", true);
     contract.on("NewTaskCreated", async (taskIndex, task) => {
-        console.log(`New task detected: Hello Hello Hello, ${task.name}`);
+        console.log(`New task detected: ${task.name}`);
         var tasksMap = this.state.tasksMap;
         var taskNameValue = tasksMap.get(task.name);
-        tasksMap.set(task.name, {taskCreatedBlock: task.taskCreatedBlock, taskIndex: taskIndex, signed: false, receipt: taskNameValue['receipt']});
+        var receipt;
+        if(taskNameValue != null)
+          receipt = taskNameValue['receipt']
+        tasksMap.set(task.name, {taskCreatedBlock: task.taskCreatedBlock, taskIndex: taskIndex, signed: false, receipt: receipt});
         this.setState({ tasksMap: tasksMap});  
         var mapToArr = Array.from(tasksMap.entries());
         window.sessionStorage.setItem(sessionStorageBaseName+"tasksMap", JSON.stringify(mapToArr));
         await this.signAndRespondToTask(taskIndex, task.taskCreatedBlock, task.name);
+        this.setState({ latestBlockTask: task.taskCreatedBlock});  
+        window.sessionStorage.setItem(sessionStorageBaseName+"latestBlockTask", task.taskCreatedBlock);
     });
-  
     console.log("Monitoring for new tasks...");
-  }
-  
-  async mainFunction() {
-    await this.registerOperator();
-    this.monitorNewTasks().catch((error) => {
-        console.error("Error monitoring tasks:", error);
-    });
   }
   
   async createNewTask() {
@@ -135,11 +226,6 @@ class App extends Component {
       tasksMap.set(taskName, {receipt: receipt.transactionHash});
       this.setState({ tasksMap: tasksMap});
 
-      var myTasks = this.state.tasksArray;
-      myTasks.push(taskName);
-      this.setState({ tasksArray: myTasks });
-
-      window.sessionStorage.setItem(sessionStorageBaseName+"tasksArray", JSON.stringify(this.state.tasksArray));
       var mapToArr = Array.from(tasksMap.entries());
       window.sessionStorage.setItem(sessionStorageBaseName+"tasksMap", JSON.stringify(mapToArr));
     } catch (error) {
@@ -147,9 +233,8 @@ class App extends Component {
     }
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.loadBlockchainData();
-    this.monitorNewTasks();
   }
 
   async loadBlockchainData() {
@@ -157,35 +242,27 @@ class App extends Component {
     const accounts = await web3.eth.getAccounts();
     const walletAddress = wallet.address;
 
-    var latestTaskNum = -1;
-    var allTaskHashes = -2;
-    var allTaskResponses = -3;
+    var latestTaskNum = 0;
+    var allTaskHashes = "N/A";
+    var allTaskResponses = "N/A";
     
     try {
       latestTaskNum = await contract.latestTaskNum();
-      allTaskHashes = await contract.allTaskHashes(latestTaskNum-1);
+      allTaskHashes = await contract.allTaskHashes(latestTaskNum);
       allTaskResponses = await contract.allTaskResponses(walletAddress, latestTaskNum-1);
     } catch (error) {
-      allTaskHashes = error.toString() + "ERROR";
+      if(error.toString().includes("value out-of-bounds"))
+        allTaskHashes = "N/A"
+      else
+        allTaskHashes = error.toString() + "ERROR";
     }
 
-    var operatorRegisteredOnELSaved = window.sessionStorage.getItem(sessionStorageBaseName+"operatorRegisteredOnEL");
-    if ( operatorRegisteredOnELSaved == null ) 
-    {
-      operatorRegisteredOnELSaved = false;
-    }
+    //To convert string value to boolean
+    var operatorRegisteredOnELSaved = window.sessionStorage.getItem(sessionStorageBaseName+"operatorRegisteredOnEL") === "true";
 
-    var operatorRegisteredOnAVSSaved = window.sessionStorage.getItem(sessionStorageBaseName+"operatorRegisteredOnAVS");
-    if ( operatorRegisteredOnAVSSaved == null ) 
-    {
-      operatorRegisteredOnAVSSaved = false;
-    }
+    var operatorRegisteredOnAVSSaved = window.sessionStorage.getItem(sessionStorageBaseName+"operatorRegisteredOnAVS") === "true";
 
-    var tasksList = JSON.parse(window.sessionStorage.getItem(sessionStorageBaseName+"tasksArray"));
-    if (tasksList == null)
-    {
-      tasksList = [];
-    }
+    var monitoringTasks = false;
 
     var tasksMap = JSON.parse(window.sessionStorage.getItem(sessionStorageBaseName+"tasksMap"));
     if (tasksMap == null)
@@ -194,20 +271,25 @@ class App extends Component {
     }
     else
     {
-      console.log("LOL:",tasksMap)
       tasksMap = new Map((tasksMap));
+    }
+
+    var latestBlockTaskSaved = window.sessionStorage.getItem(sessionStorageBaseName+"latestBlockTask");
+    if(latestBlockTaskSaved == null)
+    {
+      latestBlockTaskSaved = 0;
     }
 
     this.setState({ 
       account: accounts[0], 
       tasksMap: tasksMap,
-      tasksArray: tasksList,
-      tasksLength: tasksList.length, 
       latestTaskNum: latestTaskNum, 
       allTaskHashes: allTaskHashes,
       allTaskResponses: allTaskResponses,
       operatorRegisteredOnEL: operatorRegisteredOnELSaved,
       operatorRegisteredOnAVS: operatorRegisteredOnAVSSaved,
+      monitoringTasks: monitoringTasks,
+      latestBlockTask: latestBlockTaskSaved,
     })
   }
 
@@ -219,60 +301,134 @@ class App extends Component {
     super(props)
     this.createNewTask = this.createNewTask.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.mainFunction = this.mainFunction.bind(this);
     this.registerOperator = this.registerOperator.bind(this);
     var tasksMap = new Map();
     this.state = { 
       account: '', 
-      tasksMap: tasksMap, 
-      tasksArray: [], 
-      textInput: "", 
+      tasksMap: tasksMap,
+      textInput: '', 
       operatorRegisteredOnEL: false,
       operatorRegisteredOnAVS: false,
+      monitoringTasks: false,
+      latestBlockTask: 0,
      }
   }
 
   render() {
     return (
+      <div id="backdrop" >
+        <div className="container">
+          <Grid container spacing={2}>
+          <Grid item xs={12} md={12}>
+              <StaticItem><h3>Hello World AVS <b id="gradientColor">with React Frontend</b></h3></StaticItem>
+            </Grid>
+            <Grid item xs={6} md={8}>
+              <Item>Latest Task Hash: {this.state.allTaskHashes}</Item>
+            </Grid>
+            <Grid item xs={6} md={4}>
+              <Item>Latest Task Hash: {this.state.latestBlockTask}</Item>
+            </Grid>
+            <Grid item xs={6} md={6}>
+              <Item>Your account: {this.state.account}</Item>
+            </Grid>
+            <Grid item xs={6} md={6}>
+              <Item>Latest Task Number: {this.state.latestTaskNum}</Item>
+            </Grid>
+            <Grid item xs={6} md={12}>
+              <Item>Latest Task Response: {this.state.allTaskResponses}</Item>
+            </Grid>
+          </Grid>
 
+          <Grid container spacing={2}>
+          <Grid item xs={12} md={12}>
+              <StaticItem><h5>Task Creation</h5></StaticItem>
+            </Grid>
+            <Grid item xs={4} md={4}>
+              <ELHeighAdjustedPaper>
+                <Box>
+                  <TextField
+                    label="Task Name"
+                    variant="filled"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    helperText={'Your task name will be:'+this.state.textInput}
+                    onChange={ this.handleChange }>
+                  </TextField>
+                </Box>
+              </ELHeighAdjustedPaper>
+            </Grid>
+            <Grid item xs={4} md={4}>
+              <ELHeighAdjustedPaper>
+                <Box>
+                  <ELButton 
+                  variant="contained" 
+                  onClick={()=>this.createNewTask()}
+                  disabled={(!this.state.monitoringTasks) || (this.state.textInput === "")}
+                  >Click Task</ELButton>
+                </Box>
+              </ELHeighAdjustedPaper>
+            </Grid>
+            <Grid item xs={4} md={4}>
+            <ELHeighAdjustedPaper>
+                <Box>
+                  <ELButton 
+                  variant="contained" 
+                  onClick={()=>this.monitorNewTasks()} 
+                  disabled={(!this.state.operatorRegisteredOnEL && !this.state.operatorRegisteredOnAVS) || (this.state.monitoringTasks)}
+                  >Monitor Tasks</ELButton>
+                </Box>
+              </ELHeighAdjustedPaper>
+            </Grid>
+          </Grid>
+          <TableContainer component={PaddedPaper}>
+            <Table aria-label="customized table">
+              <TableHead>
+                <TableRow>
+                  <StyledTableCell>Task Name</StyledTableCell>
+                  <StyledTableCell align="right">Task Created Block&nbsp;</StyledTableCell>
+                  <StyledTableCell align="right">Task Index&nbsp;</StyledTableCell>
+                  <StyledTableCell align="right">Is Signed&nbsp;</StyledTableCell>
+                  <StyledTableCell align="right">Tx Receipt</StyledTableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {Array.from(this.state.tasksMap).map(([task, values], index) => (
+                  <StyledTableRow key={index}>
+                    <StyledTableCell component="th" scope="row">
+                    {task}
+                    </StyledTableCell>
+                    <StyledTableCell align="right">{values.taskCreatedBlock}</StyledTableCell>
+                    <StyledTableCell align="right">{values.taskIndex} </StyledTableCell>
+                    <StyledTableCell align="right">{values.signed!==undefined && values.signed+""}</StyledTableCell>
+                    <StyledTableCell align="right">{values.receipt} </StyledTableCell>
+                  </StyledTableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-      <div className="container">
-        <h1>Hello, World!</h1>
-        <p>Your account: {this.state.account}</p>
-        <p>Total Tasks: {this.state.tasksArray.length}</p>
-        <p>Latest Task Number: {this.state.latestTaskNum}</p>
-        <p>Latest Task Hashe: {this.state.allTaskHashes}</p>
-        <p>Latest Task Response: {this.state.allTaskResponses}</p>
-        
-        <input type="text" onChange={ this.handleChange } />
-        <input
-          type="button"
-          value="Click to create new task"
-          onClick={()=>this.createNewTask()}
-        />
-        <p>Your new task name will be: {this.state.textInput}</p>
-        <p>operatorRegisteredOnEL: {this.state.operatorRegisteredOnEL + ""}</p>
-        <p>operatorRegisteredOnAVS: {this.state.operatorRegisteredOnAVS + ""}</p>
-        {this.state.operatorRegisteredOnEL===false && this.state.operatorRegisteredOnAVS===false && (
-          <div>
-          <button onClick={()=>this.mainFunction()}>Register Operator</button>
-          </div>
-        )}
-        <ul>
-          {this.state.tasksArray.map((task, index) => (
-            <li key={index}>
-              {task}
-            </li>
-          ))}
-        </ul>
-        <ul>
-          {Array.from(this.state.tasksMap).map(([task, values], index) => (
-            <li key={index}>
-              {task} and {values.receipt} and {values.taskCreatedBlock} and {values.taskIndex} and {values.signed+""}
-            </li>
-          ))}
-        </ul>
-      </div>  
+          <Grid container spacing={2}>
+          <Grid item xs={12} md={12}>
+              <StaticItem><h5>Operator Registration</h5></StaticItem>
+            </Grid>
+            <Grid item xs={4} md={4}>
+              <ELPaper>Operator Registered On EigenLayer: {this.state.operatorRegisteredOnEL + ""} </ELPaper>
+            </Grid>
+            <Grid item xs={4} md={4}>
+              <ELPaper>Operator Registered On AVS: {this.state.operatorRegisteredOnAVS + ""}</ELPaper>
+            </Grid>
+            <Grid item xs={4} md={4}>
+              <ELPaper>            
+                <ELButton 
+                  disabled={this.state.operatorRegisteredOnEL && this.state.operatorRegisteredOnAVS} 
+                  onClick={()=>this.registerOperator()} variant="contained">Register Operator
+                </ELButton>
+              </ELPaper>
+            </Grid>
+          </Grid>
+        </div>
+      </div>
     );
   }
 }

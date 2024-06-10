@@ -4,9 +4,8 @@ node_modules/
 # Ignore built output
 dist/
 
-# Ignore environment-specific files
-.env
-.env.local
+# Ignore environment-specific files - We will upload the env var to the base react app repo to show how to name the variable
+#.env
 
 # Ignore editor-specific files
 .vscode/
@@ -18,5 +17,4 @@ dist/
 
 # Ignore local anvil state
 # utils/anvil/*.json
-
 oldUtils
