@@ -1,6 +1,6 @@
-# Hello World AVS
+# Hello World AVS with React JS
 
-Welcome to the Hello World AVS.
+Welcome to the Hello World AVS, this repo is a fork of the original with some added React.js frontend code to interact with the on-chain component
 
 This project shows you the simplest functionality you can expect from an AVS.
 
