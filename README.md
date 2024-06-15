@@ -26,6 +26,8 @@ Where additional sophistication with AVSs come into the picture:
 
 ## Quick Start
 
+- NB: The PRIVAE_KEY in the env var is used to sign txs on the local chain, it was included in the .env vars on purpose but not for production use
+
 ### Dependencies
 
 1. [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
