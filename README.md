@@ -34,17 +34,13 @@ Where additional sophistication with AVSs come into the picture:
 2. [Foundry](https://getfoundry.sh/)
 3. [Docker](https://www.docker.com/get-started/)
 
-Following NodeJS packages:
-1. tcs
-2. ethers
-
 ### Steps
 
 1. Make sure Docker is running
 2. Run `yarn install`
 3. Run `make start-chain-with-contracts-deployed`
     * This will build the contracts, start an Anvil chain, deploy the contracts to it, and leaves the chain running in the current terminal
-4. Run `cd base-react-app` followed by `npm run start`
+4. Run `cd base-react-app` followed by `npm i` (to install react dependencies) followed by `npm run start`
     * Instead of running the stand-alone operator software as in the original repo, we just run the React server (AVS code was moved into React)
 5. Use the buttons to control the AVS  software
     * Start by Registering the oeprator `Register Operator`; followed by `Monitor Tasks`; then enter any task name and click on `Create Task`
@@ -76,6 +72,7 @@ To deploy the Hello World AVS contracts to the Holesky network, follow these ste
     forge script script/HoleskyDeployer.s.sol:HoleskyDeployer --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast -vvvv
     ```
     Replace `$RPC_URL` with your Holesky RPC URL and `$PRIVATE_KEY` with your private key.
+    If you want to use it with react make sure the env vars are properly names (names starting with `REACT_APP_`)
 
 ## Adding a New Strategy
 
