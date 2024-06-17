@@ -32,7 +32,7 @@ Where additional sophistication with AVSs come into the picture:
 ![screenshot-png](./assets/screenshot-web-app.png)
 
 - How the WebApp can be used:
-![screencast](./assets/video-web-app.webm)
+![Watch the video](./assets/video-web-app.mp4)
 
 
 ### Dependencies
