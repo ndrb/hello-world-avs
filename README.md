@@ -28,6 +28,13 @@ Where additional sophistication with AVSs come into the picture:
 
 - NB: The PRIVAE_KEY in the env var is used to sign txs on the local chain, it was included in the .env vars on purpose but not for production use
 
+- What the WebApp looks like:
+![screenshot-png](./assets/screenshot-web-app.png)
+
+- How the WebApp can be used:
+![screencast](./assets/video-web-app.webm)
+
+
 ### Dependencies
 
 1. [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
